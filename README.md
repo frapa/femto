@@ -5,7 +5,9 @@ nano? pico? femto!
 A terminal based text editor written in rust in 300 LOC and 300 Kb of statically
 linked (stripped) binary.
 
-<img align="center" src="https://raw.githubusercontent.com/frapa/femto/master/femto.gif" alt="femto video">
+<div style="text-align: center;">
+       <img src="https://raw.githubusercontent.com/frapa/femto/master/femto.gif" alt="femto video">
+</div>
 
 The editor is meant to showcase a minimal terminal text editor written
 in the fewer number of lines possible. To achieve this goal, it was necessary
