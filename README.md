@@ -55,5 +55,5 @@ Rust                             1             52              6            300
 Linux pre-compiled and stripped binary:
 
 ```bash
-EXEC='/usr/local/bin/femto' && sudo wget https://github.com/frapa/timers/releases/latest/download/timers-linux -O $EXEC && sudo chmod +x $EXEC
+EXEC='/usr/local/bin/femto' && sudo wget https://raw.githubusercontent.com/frapa/femto/master/femto -O $EXEC && sudo chmod +x $EXEC
 ```
