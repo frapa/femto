@@ -257,7 +257,6 @@ impl Buffer for LineBuffer {
 }
 
 fn main() {
-    let mut stdout = stdout().into_raw_mode().expect("Unsupported terminal.");
     let mut editor = Editor::new();
 
     let mut args: Vec<String> = std::env::args().collect();
@@ -266,6 +265,8 @@ fn main() {
     } else if args.len() > 2 {
         return println!("Error: too many arguments.\nusage: femto [FILE]");
     }
+
+    let mut stdout = stdout().into_raw_mode().expect("Unsupported terminal.");
 
     loop {
         print_screen(&mut stdout, &mut editor);
