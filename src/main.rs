@@ -94,15 +94,15 @@ impl Editor {
         }
     }
 
-    fn prompt(&self) -> (String, usize, usize) {
+    fn prompt(&self) -> (&str, String, usize) {
         match &self.state {
             State::Femto => match &self.message {
-                Some(message) => (message.clone(), 0, 0),
-                None => (String::from("femto"), 0, 0),
+                Some(message) => ("", message.clone(), 0),
+                None => ("femto", String::new(), 0),
             },
             State::Cmd((state, buf)) => match state {
-                Command::Open => (format!("Open file at: {}", to_str(&buf.line)), 15, buf.col),
-                Command::Save => (format!("Save file at: {}", to_str(&buf.line)), 15, buf.col),
+                Command::Open => ("Open file at: ", to_str(&buf.line), buf.col),
+                Command::Save => ("Save file at: ", to_str(&buf.line), buf.col),
             },
         }
     }
@@ -166,7 +166,8 @@ impl Buffer for FileBuffer {
         let (col, row) = (self.col, self.row);
 
         if c == '\n' {
-            self.lines.insert(row + 1, Vec::new());
+            let new_line = self.line().drain(col..).collect();
+            self.lines.insert(row + 1, new_line);
             self.move_caret(1, -(col as i32));
             return;
         }
@@ -259,6 +260,13 @@ fn main() {
     let mut stdout = stdout().into_raw_mode().expect("Unsupported terminal.");
     let mut editor = Editor::new();
 
+    let mut args: Vec<String> = std::env::args().collect();
+    if args.len() == 2 {
+        editor.open(PathBuf::from(args.remove(1)));
+    } else if args.len() > 2 {
+        return println!("Error: too many arguments.\nusage: femto [FILE]");
+    }
+
     loop {
         print_screen(&mut stdout, &mut editor);
         if handle_keys(&mut editor) {
@@ -283,6 +291,12 @@ fn print_screen(stdout: &mut Stdout, editor: &mut Editor) {
         if i < file_buf.lines.len() {
             // Content
             let line = file_buf.lines.get(i).unwrap();
+
+            if line.len() < coff {
+                write!(stdout, "\n\r").unwrap();
+                continue;
+            }
+
             let part = &line[coff..min(coff + w as usize, line.len())];
             write!(stdout, "{}\n\r", to_str(&Vec::from(part))).unwrap();
         } else {
@@ -292,16 +306,27 @@ fn print_screen(stdout: &mut Stdout, editor: &mut Editor) {
     }
 
     // Status bar
-    let (prompt, prompt_len, prompt_col) = editor.prompt();
-    let bar_right = format!("row: {}, col: {}", r, c);
-    let spacer = " ".repeat(w as usize - prompt.len() - bar_right.len());
-    let bar = format!("{}{}{}", prompt, spacer, bar_right);
+    let (prompt, mut cmd, cmd_col) = editor.prompt();
+    let bar_right = format!(" row: {}, col: {}", r, c);
+    let avail = w as usize - bar_right.len() - prompt.len();
+    let cmd_cur_pos = (prompt.len() + cmd_col + 1) as u16;
+    let mut start = 0;
+
+    let mut spacer = String::new();
+    if cmd.len() > avail {
+        start = min(cmd_col, cmd.len() - avail);
+        cmd = cmd[start..(start + avail)].to_string();
+    } else {
+        spacer = " ".repeat(avail - cmd.len());
+    }
+
+    let bar = format!("{}{}{}{}", prompt, cmd, spacer, bar_right);
     write!(stdout, "{}{}{}", Invert, bar, Reset).unwrap();
 
     // Draw cursor on the right place
     match editor.state {
         State::Femto => write!(stdout, "{}", Goto((c - coff) as u16, (r - roff) as u16)).unwrap(),
-        _ => write!(stdout, "{}", Goto((prompt_len + prompt_col) as u16, h)).unwrap(),
+        _ => write!(stdout, "{}", Goto(cmd_cur_pos - start as u16, h)).unwrap(),
     }
     // Ensure everything visible
     stdout.flush().unwrap();
@@ -323,6 +348,8 @@ fn handle_keys(editor: &mut Editor) -> bool {
         Key::Right => editor.buffer().move_caret(0, 1),
         Key::Up => editor.buffer().move_caret(-1, 0),
         Key::Down => editor.buffer().move_caret(1, 0),
+        Key::Home => editor.buffer().move_caret(0, std::i32::MIN / 2),
+        Key::End => editor.buffer().move_caret(0, std::i32::MAX / 2),
         _ => {}
     }
     false
