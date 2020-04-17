@@ -337,6 +337,7 @@ fn print_screen(stdout: &mut Stdout, editor: &mut Editor) {
 fn handle_keys(editor: &mut Editor) -> bool {
     let c = stdin().keys().next().unwrap();
     match c.unwrap() {
+        Key::Char('\t') => for _ in 0..4 { editor.push(' ') },
         Key::Char(c) => editor.push(c),
         Key::Ctrl('q') => return true,
         Key::Ctrl('o') => editor.start_open(),
