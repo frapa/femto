@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{prelude::*, stdin, stdout, BufReader, Stdout, Write};
 use std::path::PathBuf;
 use termion::style::{Invert, Reset};
-use termion::{cursor::Goto, event::Key, input::TermRead, raw::IntoRawMode};
+use termion::{cursor::Goto, event::Key, input::TermRead, raw::IntoRawMode, screen::ToAlternateScreen};
 
 fn to_str(s: &Vec<char>) -> String {
     s.iter().collect()
@@ -267,6 +267,7 @@ fn main() {
     }
 
     let mut stdout = stdout().into_raw_mode().expect("Unsupported terminal.");
+	write!(stdout, "{}", ToAlternateScreen).unwrap();
 
     loop {
         print_screen(&mut stdout, &mut editor);
