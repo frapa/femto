@@ -32,6 +32,7 @@ Rust                             1             52              6            300
 
 ## Features
 
+- Be correct (no bugs, weird UX to save lines, etc)
 - Quit editor (ctrl+q).
 - Open and save files (ctrl+o, crtl+s).
 - Remember saved path.
@@ -46,6 +47,7 @@ Rust                             1             52              6            300
 
 ## Non-features
 
+- Minimum amount of lines and maximum simplicity.
 - Ask confirmation when exiting with modification.
 - Path autocomplete.
 - Configure tabs/spaces.
@@ -61,3 +63,7 @@ Linux pre-compiled and stripped binary:
 ```bash
 EXEC='/usr/local/bin/femto' && sudo wget https://raw.githubusercontent.com/frapa/femto/master/femto -O $EXEC && sudo chmod +x $EXEC
 ```
+
+## Contributing
+
+Please feel free to send a pull request if you see any problem or you see a way to reduce the line count. This is just a challenge to write a simple terminal text editor in the simplest possible way, so we're not looking into adding big new functonality, but bugs should be solved and annoying behavior fixed.
